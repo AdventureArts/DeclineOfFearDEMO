@@ -14,6 +14,9 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	TSubobjectPtr<class USpringArmComponent> supportPivot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	TSubobjectPtr<class USpringArmComponent> cameraSupport;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)

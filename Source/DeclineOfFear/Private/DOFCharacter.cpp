@@ -7,13 +7,21 @@
 ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+	supportPivot = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("PivotSupport"));
+	supportPivot->AttachTo(RootComponent);
+	supportPivot->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
+	supportPivot->bEnableCameraLag = true;
+	supportPivot->bEnableCameraRotationLag = true;
+	supportPivot->CameraLagSpeed = 8.f;
+	supportPivot->CameraRotationLagSpeed = 8.f;
+	supportPivot->TargetArmLength = 50.f;
+	supportPivot->bUseControllerViewRotation = true;
+
 	cameraSupport = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraSupport"));
-	cameraSupport->AttachTo(RootComponent);
-	cameraSupport->bEnableCameraLag = true;
-	cameraSupport->bEnableCameraRotationLag = true;
-	cameraSupport->CameraLagSpeed = 3.f;
-	cameraSupport->CameraRotationLagSpeed = 8.f;
-	cameraSupport->bUseControllerViewRotation = true;
+	cameraSupport->AttachTo(supportPivot);
+	cameraSupport->SetRelativeLocation(FVector(0.f, 50.f, 0.f));
+	cameraSupport->TargetArmLength = 50.f;
+	cameraSupport->bUseControllerViewRotation = false;
 
 	playerCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("PlayerCamera"));
 	playerCamera->AttachTo(cameraSupport, USpringArmComponent::SocketName);
