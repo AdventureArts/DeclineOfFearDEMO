@@ -26,6 +26,8 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 	playerCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("PlayerCamera"));
 	playerCamera->AttachTo(cameraSupport, USpringArmComponent::SocketName);
 	playerCamera->bUseControllerViewRotation = false;
+
+	bUseControllerRotationYaw = false;
 }
 
 void ADOFCharacter::BeginPlay()
