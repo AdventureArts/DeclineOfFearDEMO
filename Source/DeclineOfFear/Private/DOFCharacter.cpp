@@ -7,6 +7,16 @@
 ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+	walkSpeed = 150.f;
+	runSpeed = 400.f;
+
+	CharacterMovement->MaxAcceleration = 512.f;
+	CharacterMovement->GroundFriction = 2.f;
+	CharacterMovement->BrakingDecelerationWalking = 256.f;
+	CharacterMovement->bOrientRotationToMovement = true;
+	CharacterMovement->RotationRate.Yaw = 270.f;
+	CharacterMovement->MaxWalkSpeed = walkSpeed;
+
 	supportPivot = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("PivotSupport"));
 	supportPivot->AttachTo(RootComponent);
 	supportPivot->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
@@ -20,7 +30,7 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 	cameraSupport = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraSupport"));
 	cameraSupport->AttachTo(supportPivot);
 	cameraSupport->SetRelativeLocation(FVector(0.f, 50.f, 0.f));
-	cameraSupport->TargetArmLength = 50.f;
+	cameraSupport->TargetArmLength = cameraDistance;
 	cameraSupport->bUseControllerViewRotation = false;
 
 	playerCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("PlayerCamera"));
@@ -33,6 +43,21 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 void ADOFCharacter::BeginPlay()
 {
 	
+}
+
+bool ADOFCharacter::IsRunning()
+{
+	return running;
+}
+
+void ADOFCharacter::SetForwardSpeed(float speed)
+{
+	forwardSpeed = speed;
+}
+
+void ADOFCharacter::SetRightSpeed(float speed)
+{
+	rightSpeed = speed;
 }
 
 void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputComponent)
@@ -49,6 +74,8 @@ void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputCompon
 	InputComponent->BindAxis("WalkRight", this, &ADOFCharacter::WalkRight);
 	InputComponent->BindAction("CameraZoomIn", EInputEvent::IE_Released, this, &ADOFCharacter::CameraZoomIn);
 	InputComponent->BindAction("CameraZoomOut", EInputEvent::IE_Released, this, &ADOFCharacter::CameraZoomOut);
+	InputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &ADOFCharacter::StartRunning);
+	InputComponent->BindAction("Run", EInputEvent::IE_Released, this, &ADOFCharacter::StopRunning);
 }
 
 void ADOFCharacter::unPossessMe()
@@ -72,6 +99,29 @@ void ADOFCharacter::unPossessMe()
 void ADOFCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	UpdateMovementDirection();
+	InterpolateCameraDistance(DeltaSeconds);
+}
+
+void ADOFCharacter::UpdateMovementDirection()
+{
+	FVector movementDirection;
+
+	movementDirection = FVector(forwardSpeed, rightSpeed, 0.f);
+	movementDirection = GetControlRotation().RotateVector(movementDirection);
+	movementDirection = movementDirection.SafeNormal2D();
+
+	AddMovementInput(movementDirection, 1.f);
+}
+
+void ADOFCharacter::InterpolateCameraDistance(float delta)
+{
+	float armLength = cameraSupport->TargetArmLength;
+
+	armLength = FMath::FInterpTo(armLength, cameraDistance, delta, 4.f);
+
+	cameraSupport->TargetArmLength = armLength;
 }
 
 void ADOFCharacter::LookUp(float val)
@@ -86,26 +136,37 @@ void ADOFCharacter::Turn(float val)
 
 void ADOFCharacter::WalkForward(float val)
 {
-	FRotator viewRotator = GetControlRotation();
-	FVector viewDirection = viewRotator.Vector().SafeNormal2D();
-
-	AddMovementInput(viewDirection, val * 0.5f);
+	forwardSpeed = val;
 }
 
 void ADOFCharacter::WalkRight(float val)
 {
-	FRotator viewRotator = GetControlRotation().Add(0.f, 90.f, 0.f);
-	FVector viewDirection = viewRotator.Vector().SafeNormal2D();
-	
-	AddMovementInput(viewDirection, val * 0.5f);
+	rightSpeed = val;
 }
 
 void ADOFCharacter::CameraZoomIn()
 {
-	
+	cameraDistance -= 10;
 }
 
 void ADOFCharacter::CameraZoomOut()
 {
-	
+	cameraDistance += 10;
+}
+
+void ADOFCharacter::StartRunning()
+{
+	if (!running)
+	{
+		running = true;
+
+		CharacterMovement->MaxWalkSpeed = runSpeed;
+	}
+}
+
+void ADOFCharacter::StopRunning()
+{
+	running = false;
+
+	CharacterMovement->MaxWalkSpeed = walkSpeed;
 }
