@@ -19,10 +19,10 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 	float rightSpeed = 0.f;
 	float cameraDistance = 50.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float walkSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float runSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
