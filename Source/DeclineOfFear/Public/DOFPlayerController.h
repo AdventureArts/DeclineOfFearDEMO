@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "DOFCharacter.h"
 #include "DOFPlayerController.generated.h"
 
 /**
@@ -15,11 +16,18 @@ class DECLINEOFFEAR_API ADOFPlayerController : public APlayerController
 
 	APawn *toDestroy;
 
+	ADOFCharacter *controlledCharacter;
+
 public:
 
 	void toDestroyOnPossess(APawn *pawn);
 
 protected:
 
+	virtual void BeginPlay();
+
+	virtual void SetupControllerInputComponent(UInputComponent* InputComponent);
+
 	virtual void Possess(class APawn* inPawn) override;
+	virtual void UnPossessAvatar();
 };

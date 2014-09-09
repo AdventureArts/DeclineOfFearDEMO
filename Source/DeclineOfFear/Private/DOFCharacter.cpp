@@ -66,7 +66,7 @@ void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputCompon
 
 	check(InputComponent);
 
-	InputComponent->BindAction("UnPossessAvatar", IE_Released, this, &ADOFCharacter::unPossessMe);
+	//InputComponent->BindAction("UnPossessAvatar", IE_Released, this, &ADOFCharacter::UnPossessMe);
 
 	InputComponent->BindAxis("Turn", this, &ADOFCharacter::Turn);
 	InputComponent->BindAxis("LookUp", this, &ADOFCharacter::LookUp);
@@ -78,7 +78,7 @@ void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputCompon
 	InputComponent->BindAction("Run", EInputEvent::IE_Released, this, &ADOFCharacter::StopRunning);
 }
 
-void ADOFCharacter::unPossessMe()
+void ADOFCharacter::UnPossessMe()
 {
 	if (Controller != nullptr)
 	{

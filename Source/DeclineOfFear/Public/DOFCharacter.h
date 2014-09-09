@@ -41,13 +41,13 @@ public:
 	void SetForwardSpeed(float speed);
 	void SetRightSpeed(float speed);
 
+	void UnPossessMe();
+
 protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent *InputComponent) override;
 
 	virtual void BeginPlay() override;
-
-	void unPossessMe();
 
 	void UpdateMovementDirection();
 	void InterpolateCameraDistance(float delta);
