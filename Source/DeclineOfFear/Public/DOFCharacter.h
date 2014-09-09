@@ -63,4 +63,10 @@ protected:
 	virtual void CameraZoomOut();
 	virtual void StartRunning();
 	virtual void StopRunning();
+
+	UFUNCTION(reliable, server, WithValidation)
+	virtual void ServerStartRunning();
+
+	UFUNCTION(reliable, server, WithValidation)
+	virtual void ServerStopRunning();
 };

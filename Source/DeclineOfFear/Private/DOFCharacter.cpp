@@ -170,6 +170,8 @@ void ADOFCharacter::StartRunning()
 
 		CharacterMovement->MaxWalkSpeed = runSpeed;
 	}
+
+	if (Role < ROLE_Authority) ServerStartRunning();
 }
 
 void ADOFCharacter::StopRunning()
@@ -177,4 +179,26 @@ void ADOFCharacter::StopRunning()
 	running = false;
 
 	CharacterMovement->MaxWalkSpeed = walkSpeed;
+
+	if (Role < ROLE_Authority) ServerStopRunning();
+}
+
+void ADOFCharacter::ServerStartRunning_Implementation()
+{
+	StartRunning();
+}
+
+void ADOFCharacter::ServerStopRunning_Implementation()
+{
+	StopRunning();
+}
+
+bool ADOFCharacter::ServerStartRunning_Validate()
+{
+	return true;
+}
+
+bool ADOFCharacter::ServerStopRunning_Validate()
+{
+	return true;
 }
