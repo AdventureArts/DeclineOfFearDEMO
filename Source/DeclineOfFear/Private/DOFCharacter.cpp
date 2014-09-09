@@ -45,6 +45,12 @@ void ADOFCharacter::BeginPlay()
 	
 }
 
+void ADOFCharacter::TeleportCamera(FVector loc, FRotator rot)
+{
+	supportPivot->PreviousDesiredLoc = loc;
+	supportPivot->PreviousDesiredRot = rot;
+}
+
 bool ADOFCharacter::IsRunning()
 {
 	return running;
@@ -84,6 +90,8 @@ void ADOFCharacter::UnPossessMe()
 	{
 		Controller->PlayerState->bIsSpectator = true;
 		Controller->ChangeState(NAME_Spectating);
+
+		Mesh->SetVisibility(false, true);
 
 #ifdef UE_EDITOR
 

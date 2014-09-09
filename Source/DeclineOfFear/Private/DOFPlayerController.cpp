@@ -32,11 +32,32 @@ void ADOFPlayerController::toDestroyOnPossess(APawn *pawn)
 
 void ADOFPlayerController::Possess(class APawn* inPawn)
 {
-	Super::Possess(inPawn);
+	ASpectatorPawn *specP = GetSpectatorPawn();
+
+	if (inPawn && specP)
+	{
+		FVector destLocation = specP->GetActorLocation();
+		destLocation.Z -= inPawn->GetDefaultHalfHeight();
+
+		FRotator destRotation = specP->GetControlRotation();
+		destRotation.Pitch = 0.f;
+
+		inPawn->TeleportTo(destLocation, destRotation);
+	}
 
 	ADOFCharacter *character = Cast<ADOFCharacter>(inPawn);
 
-	if (character) controlledCharacter = character;
+	if (character)
+	{
+		controlledCharacter = character;
+
+		if (specP)
+		{
+			controlledCharacter->TeleportCamera(specP->GetActorLocation(), specP->GetControlRotation());
+		}
+	}
+
+	if (controlledCharacter) controlledCharacter->Mesh->SetVisibility(true, true);
 
 	if (toDestroy != nullptr)
 	{
@@ -54,13 +75,13 @@ void ADOFPlayerController::Possess(class APawn* inPawn)
 #endif
 		}
 	}
+
+	Super::Possess(inPawn);
 }
+
+ADOFCharacter* ADOFPlayerController::GetControlledCharacter() { return controlledCharacter; };
 
 void ADOFPlayerController::UnPossessAvatar()
 {
-	if (controlledCharacter)
-	{
-		controlledCharacter->UnPossessMe();
-		controlledCharacter = nullptr;
-	}
+	if (controlledCharacter) controlledCharacter->UnPossessMe();
 }

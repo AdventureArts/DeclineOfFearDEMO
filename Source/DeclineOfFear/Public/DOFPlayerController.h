@@ -22,12 +22,15 @@ public:
 
 	void toDestroyOnPossess(APawn *pawn);
 
+	ADOFCharacter* GetControlledCharacter();
+
+	virtual void Possess(class APawn* inPawn) override;
+
 protected:
 
 	virtual void BeginPlay();
 
 	virtual void SetupControllerInputComponent(UInputComponent* InputComponent);
 
-	virtual void Possess(class APawn* inPawn) override;
 	virtual void UnPossessAvatar();
 };

@@ -39,30 +39,12 @@ void ADOFSpectatorPawn::possessAvatar()
 {
 	if (Controller != nullptr)
 	{
-		ADOFCharacter *dofCharacter = nullptr;
-		float distance, nearest = TNumericLimits<float>::Max();
+		ADOFPlayerController *dofPC = Cast<ADOFPlayerController>(Controller);
 
-		for (TObjectIterator<ADOFCharacter> it; it; ++it)
+		if (dofPC)
 		{
-			distance = FVector::Dist(it->GetActorLocation(), this->GetActorLocation());
-
-			if (distance < nearest)
-			{
-				dofCharacter = *it;
-				nearest = distance;
-			}
-		}
-
-		if (dofCharacter != nullptr)
-		{
-			ADOFPlayerController *dofPC = Cast<ADOFPlayerController>(Controller);
-
-			if (dofPC)
-			{
-				dofPC->toDestroyOnPossess(this);
-			}
-
-			Controller->Possess(dofCharacter);
+			dofPC->toDestroyOnPossess(this);
+			dofPC->Possess(dofPC->GetControlledCharacter());
 		}
 
 #ifdef UE_EDITOR

@@ -42,6 +42,7 @@ public:
 	void SetRightSpeed(float speed);
 
 	void UnPossessMe();
+	void TeleportCamera(FVector loc, FRotator rot);
 
 protected:
 
