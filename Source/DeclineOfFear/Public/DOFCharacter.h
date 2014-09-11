@@ -43,6 +43,10 @@ public:
 
 	void UnPossessMe();
 	void TeleportCamera(FVector loc, FRotator rot);
+	void TeleportCamera();
+
+	FVector GetCameraLocation();
+	FRotator GetCameraRotation();
 
 protected:
 
@@ -64,9 +68,10 @@ protected:
 	virtual void StartRunning();
 	virtual void StopRunning();
 
-	UFUNCTION(reliable, server, WithValidation)
+	UFUNCTION(Reliable, Server, WithValidation)
 	virtual void ServerStartRunning();
 
-	UFUNCTION(reliable, server, WithValidation)
+	UFUNCTION(Reliable, Server, WithValidation)
 	virtual void ServerStopRunning();
+
 };

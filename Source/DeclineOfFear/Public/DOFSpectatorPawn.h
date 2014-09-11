@@ -17,7 +17,5 @@ class DECLINEOFFEAR_API ADOFSpectatorPawn : public ASpectatorPawn
 
 protected:
 
-	virtual void SetupPlayerInputComponent(class UInputComponent *InputComponent) override;
-
-	void possessAvatar();
+	
 };

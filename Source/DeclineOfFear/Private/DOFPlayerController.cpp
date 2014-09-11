@@ -15,6 +15,8 @@ ADOFPlayerController::ADOFPlayerController(const class FPostConstructInitializeP
 
 void ADOFPlayerController::BeginPlay()
 {
+	controlledCharacter = Cast<ADOFCharacter>(GetPawn());
+
 	SetupControllerInputComponent(InputComponent);
 }
 
@@ -22,24 +24,25 @@ void ADOFPlayerController::SetupControllerInputComponent(UInputComponent* InputC
 {
 	check(InputComponent);
 
+	InputComponent->BindAction("PossessAvatar", IE_Released, this, &ADOFPlayerController::PossessAvatar);
 	InputComponent->BindAction("UnPossessAvatar", IE_Released, this, &ADOFPlayerController::UnPossessAvatar);
 }
 
-void ADOFPlayerController::toDestroyOnPossess(APawn *pawn)
+void ADOFPlayerController::ToDestroyOnPossess(APawn *pawn)
 {
 	toDestroy = pawn;
 }
 
 void ADOFPlayerController::Possess(class APawn* inPawn)
 {
-	ASpectatorPawn *specP = GetSpectatorPawn();
+	ADOFSpectatorPawn *specPawn = Cast<ADOFSpectatorPawn>(GetPawn());
 
-	if (inPawn && specP)
+	if (inPawn && specPawn)
 	{
-		FVector destLocation = specP->GetActorLocation();
+		FVector destLocation = specPawn->GetActorLocation();
 		destLocation.Z -= inPawn->GetDefaultHalfHeight();
 
-		FRotator destRotation = specP->GetControlRotation();
+		FRotator destRotation = specPawn->GetControlRotation();
 		destRotation.Pitch = 0.f;
 
 		inPawn->TeleportTo(destLocation, destRotation);
@@ -50,14 +53,8 @@ void ADOFPlayerController::Possess(class APawn* inPawn)
 	if (character)
 	{
 		controlledCharacter = character;
-
-		if (specP)
-		{
-			controlledCharacter->TeleportCamera(specP->GetActorLocation(), specP->GetControlRotation());
-		}
+		controlledCharacter->TeleportCamera();
 	}
-
-	if (controlledCharacter) controlledCharacter->Mesh->SetVisibility(true, true);
 
 	if (toDestroy != nullptr)
 	{
@@ -79,9 +76,86 @@ void ADOFPlayerController::Possess(class APawn* inPawn)
 	Super::Possess(inPawn);
 }
 
-ADOFCharacter* ADOFPlayerController::GetControlledCharacter() { return controlledCharacter; };
+ADOFCharacter* ADOFPlayerController::GetControlledCharacter()
+{
+	controlledCharacter = Cast<ADOFCharacter>(GetPawn());
+
+	return controlledCharacter;
+}
+
+void ADOFPlayerController::PossessAvatar()
+{
+	ADOFSpectatorPawn *specPawn = Cast<ADOFSpectatorPawn>(GetPawn());
+
+	if (specPawn && controlledCharacter)
+	{
+		FVector newLocation = specPawn->GetActorLocation();
+		newLocation.Z -= controlledCharacter->GetDefaultHalfHeight();
+
+		FRotator newRotation = specPawn->GetControlRotation();
+		newRotation.Pitch = 0.f;
+
+		ToDestroyOnPossess(specPawn);
+		ServerPossessAvatar(newLocation, newRotation);
+
+		PlayerState->bIsSpectator = false;
+
+#ifdef UE_EDITOR
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Possessed"));
+		}
+
+#endif
+	}
+}
 
 void ADOFPlayerController::UnPossessAvatar()
 {
-	if (controlledCharacter) controlledCharacter->UnPossessMe();
+	UWorld *world = GetWorld();
+
+	GetControlledCharacter();
+
+	if (world && controlledCharacter && !PlayerState->bIsSpectator)
+	{
+		FActorSpawnParameters spawnParams;
+		spawnParams.Owner = this;
+		spawnParams.Instigator = Instigator;
+
+		FVector spawnLocation;
+		FRotator spawnRotation;
+
+		spawnLocation = controlledCharacter->GetCameraLocation();
+		spawnRotation = controlledCharacter->GetCameraRotation();
+
+		ADOFSpectatorPawn *specPawn;
+
+		specPawn = world->SpawnActor<ADOFSpectatorPawn>(spawnLocation, spawnRotation, spawnParams);
+
+		Possess(specPawn);
+
+		PlayerState->bIsSpectator = true;
+
+#ifdef UE_EDITOR
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UnPossessed"));
+		}
+
+#endif
+	}
+}
+
+bool ADOFPlayerController::ServerPossessAvatar_Validate(FVector newLocation, FRotator newRotation)
+{
+	return true;
+}
+
+void ADOFPlayerController::ServerPossessAvatar_Implementation(FVector newLocation, FRotator newRotation)
+{
+	Possess(controlledCharacter);
+	controlledCharacter->SetActorLocationAndRotation(newLocation, newRotation);
+	controlledCharacter->TeleportCamera();
 }

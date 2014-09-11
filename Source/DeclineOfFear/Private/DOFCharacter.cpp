@@ -45,6 +45,22 @@ void ADOFCharacter::BeginPlay()
 	
 }
 
+FVector ADOFCharacter::GetCameraLocation()
+{
+	return playerCamera->GetComponentLocation();
+}
+
+FRotator ADOFCharacter::GetCameraRotation()
+{
+	return playerCamera->GetComponentRotation();
+}
+
+void ADOFCharacter::TeleportCamera()
+{
+	supportPivot->PreviousDesiredLoc = FVector(0.f, 0.f, 0.f);
+	supportPivot->PreviousDesiredRot = FRotator(0.f, 0.f, 0.f);
+}
+
 void ADOFCharacter::TeleportCamera(FVector loc, FRotator rot)
 {
 	supportPivot->PreviousDesiredLoc = loc;
@@ -72,8 +88,6 @@ void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputCompon
 
 	check(InputComponent);
 
-	//InputComponent->BindAction("UnPossessAvatar", IE_Released, this, &ADOFCharacter::UnPossessMe);
-
 	InputComponent->BindAxis("Turn", this, &ADOFCharacter::Turn);
 	InputComponent->BindAxis("LookUp", this, &ADOFCharacter::LookUp);
 	InputComponent->BindAxis("WalkForward", this, &ADOFCharacter::WalkForward);
@@ -82,26 +96,6 @@ void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputCompon
 	InputComponent->BindAction("CameraZoomOut", EInputEvent::IE_Released, this, &ADOFCharacter::CameraZoomOut);
 	InputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &ADOFCharacter::StartRunning);
 	InputComponent->BindAction("Run", EInputEvent::IE_Released, this, &ADOFCharacter::StopRunning);
-}
-
-void ADOFCharacter::UnPossessMe()
-{
-	if (Controller != nullptr)
-	{
-		Controller->PlayerState->bIsSpectator = true;
-		Controller->ChangeState(NAME_Spectating);
-
-		Mesh->SetVisibility(false, true);
-
-#ifdef UE_EDITOR
-
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UnPossessed"));
-		}
-
-#endif
-	}
 }
 
 void ADOFCharacter::Tick(float DeltaSeconds)

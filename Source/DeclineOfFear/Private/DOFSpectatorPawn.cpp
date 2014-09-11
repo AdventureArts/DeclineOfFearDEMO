@@ -25,35 +25,3 @@ void ADOFSpectatorPawn::BeginPlay()
 
 #endif
 }
-
-void ADOFSpectatorPawn::SetupPlayerInputComponent(class UInputComponent *InputComponent)
-{
-	Super::SetupPlayerInputComponent(InputComponent);
-
-	check(InputComponent);
-
-	InputComponent->BindAction("PossessAvatar", IE_Released, this, &ADOFSpectatorPawn::possessAvatar);
-}
-
-void ADOFSpectatorPawn::possessAvatar()
-{
-	if (Controller != nullptr)
-	{
-		ADOFPlayerController *dofPC = Cast<ADOFPlayerController>(Controller);
-
-		if (dofPC)
-		{
-			dofPC->toDestroyOnPossess(this);
-			dofPC->Possess(dofPC->GetControlledCharacter());
-		}
-
-#ifdef UE_EDITOR
-
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Possessed"));
-		}
-
-#endif
-	}
-}

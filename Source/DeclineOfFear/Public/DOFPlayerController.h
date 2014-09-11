@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "DOFSpectatorPawn.h"
 #include "DOFCharacter.h"
 #include "DOFPlayerController.generated.h"
 
@@ -20,7 +21,7 @@ class DECLINEOFFEAR_API ADOFPlayerController : public APlayerController
 
 public:
 
-	void toDestroyOnPossess(APawn *pawn);
+	void ToDestroyOnPossess(APawn *pawn);
 
 	ADOFCharacter* GetControlledCharacter();
 
@@ -32,5 +33,10 @@ protected:
 
 	virtual void SetupControllerInputComponent(UInputComponent* InputComponent);
 
+	virtual void PossessAvatar();
 	virtual void UnPossessAvatar();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	virtual void ServerPossessAvatar(FVector newLocation, FRotator newRotation);
+
 };
