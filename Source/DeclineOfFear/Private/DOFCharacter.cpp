@@ -10,6 +10,8 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 	walkSpeed = 150.f;
 	runSpeed = 400.f;
 
+	cameraBone = FName(TEXT("None"));
+
 	CharacterMovement->MaxAcceleration = 512.f;
 	CharacterMovement->GroundFriction = 2.f;
 	CharacterMovement->BrakingDecelerationWalking = 256.f;
@@ -104,6 +106,42 @@ void ADOFCharacter::Tick(float DeltaSeconds)
 
 	UpdateMovementDirection();
 	InterpolateCameraDistance(DeltaSeconds);
+	UpdateCameraAnimation();
+}
+
+void ADOFCharacter::AttachCameraToBone(FName boneName)
+{
+	if (Mesh)
+	{
+		if (Mesh->GetBoneIndex(boneName) != INDEX_NONE)
+		{
+			cameraBone = boneName;
+			cameraBoneAttached = true;
+			supportPivot->CameraLagSpeed = 12.f;
+		}
+	}
+}
+
+void ADOFCharacter::DetachCameraFromBone()
+{
+	cameraBone = FName(TEXT("None"));
+	cameraBoneAttached = false;
+	supportPivot->CameraLagSpeed = 8.f;
+}
+
+void ADOFCharacter::SetRunningCameraOffset(float offset)
+{
+	if (offset >= 0.f) runningCameraOffset = offset;
+}
+
+void ADOFCharacter::UpdateCameraAnimation()
+{
+	if (cameraBoneAttached)
+	{
+		FVector boneLocation = Mesh->GetBoneLocation(cameraBone);
+
+		supportPivot->SetWorldLocation(boneLocation);
+	}
 }
 
 void ADOFCharacter::UpdateMovementDirection()
@@ -119,9 +157,16 @@ void ADOFCharacter::UpdateMovementDirection()
 
 void ADOFCharacter::InterpolateCameraDistance(float delta)
 {
-	float armLength = cameraSupport->TargetArmLength;
+	float armLength, speed, runningFactor, runningOffset;
 
-	armLength = FMath::FInterpTo(armLength, cameraDistance, delta, 4.f);
+	armLength = cameraSupport->TargetArmLength;
+	speed = CharacterMovement->Velocity.Size2D();
+	runningFactor = (speed - walkSpeed) / (runSpeed - walkSpeed);
+	runningOffset = runningCameraOffset * runningFactor;
+
+	if (runningOffset < 0.f) runningOffset = 0.f;
+
+	armLength = FMath::FInterpTo(armLength, cameraDistance + runningOffset, delta, 4.f);
 
 	cameraSupport->TargetArmLength = armLength;
 }
@@ -161,7 +206,7 @@ void ADOFCharacter::StartRunning()
 	if (!running)
 	{
 		running = true;
-
+		supportPivot->CameraLagSpeed = 12.f;
 		CharacterMovement->MaxWalkSpeed = runSpeed;
 	}
 
@@ -171,7 +216,7 @@ void ADOFCharacter::StartRunning()
 void ADOFCharacter::StopRunning()
 {
 	running = false;
-
+	supportPivot->CameraLagSpeed = 8.f;
 	CharacterMovement->MaxWalkSpeed = walkSpeed;
 
 	if (Role < ROLE_Authority) ServerStopRunning();

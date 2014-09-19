@@ -19,6 +19,10 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 	float rightSpeed = 0.f;
 	float cameraDistance = 50.f;
 
+	FName cameraBone;
+	bool cameraBoneAttached = false;
+	float runningCameraOffset = 30.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float walkSpeed;
 
@@ -48,6 +52,15 @@ public:
 	FVector GetCameraLocation();
 	FRotator GetCameraRotation();
 
+	UFUNCTION(BlueprintCallable, Category = Camera)
+	void AttachCameraToBone(FName boneName);
+
+	UFUNCTION(BlueprintCallable, Category = Camera)
+	void DetachCameraFromBone();
+
+	UFUNCTION(BlueprintCallable, Category = Camera)
+	void SetRunningCameraOffset(float offset);
+
 protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent *InputComponent) override;
@@ -56,6 +69,8 @@ protected:
 
 	void UpdateMovementDirection();
 	void InterpolateCameraDistance(float delta);
+
+	virtual void UpdateCameraAnimation();
 
 	virtual void Tick(float DeltaSeconds) override;
 
