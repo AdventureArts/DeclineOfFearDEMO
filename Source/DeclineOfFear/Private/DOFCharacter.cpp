@@ -27,17 +27,20 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 	supportPivot->CameraLagSpeed = 8.f;
 	supportPivot->CameraRotationLagSpeed = 8.f;
 	supportPivot->TargetArmLength = 50.f;
-	supportPivot->bUseControllerViewRotation = true;
+	//supportPivot->bUseControllerViewRotation = true;
+	supportPivot->bUsePawnControlRotation = true;
 
 	cameraSupport = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraSupport"));
 	cameraSupport->AttachTo(supportPivot);
 	cameraSupport->SetRelativeLocation(FVector(0.f, 50.f, 0.f));
 	cameraSupport->TargetArmLength = cameraDistance;
-	cameraSupport->bUseControllerViewRotation = false;
+	//cameraSupport->bUseControllerViewRotation = false;
+	cameraSupport->bUsePawnControlRotation = false;
 
 	playerCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("PlayerCamera"));
 	playerCamera->AttachTo(cameraSupport, USpringArmComponent::SocketName);
-	playerCamera->bUseControllerViewRotation = false;
+	//playerCamera->bUseControllerViewRotation = false;
+	playerCamera->bUsePawnControlRotation = false;
 
 	bUseControllerRotationYaw = false;
 }
