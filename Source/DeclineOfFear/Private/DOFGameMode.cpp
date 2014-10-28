@@ -9,7 +9,7 @@
 ADOFGameMode::ADOFGameMode(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	static ConstructorHelpers::FClassFinder<ADOFCharacter> adamClass(TEXT("/Game/Blueprints/Characters/Adam/BP_Adam"));
+	static ConstructorHelpers::FClassFinder<ADOFCharacter> adamClass(TEXT("/Game/Blueprints/Characters/Hero/Hero_Character"));
 
 	PlayerControllerClass = ADOFPlayerController::StaticClass();
 	SpectatorClass = ADOFSpectatorPawn::StaticClass();
