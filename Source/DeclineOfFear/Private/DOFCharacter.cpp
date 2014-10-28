@@ -9,6 +9,7 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 {
 	walkSpeed = 150.f;
 	runSpeed = 400.f;
+	CrouchSpeed = 100.f;
 
 	cameraBone = FName(TEXT("None"));
 
@@ -74,6 +75,11 @@ bool ADOFCharacter::IsRunning()
 	return running;
 }
 
+bool ADOFCharacter::IsCrouching()
+{
+	return Crouching;
+}
+
 void ADOFCharacter::SetForwardSpeed(float speed)
 {
 	forwardSpeed = speed;
@@ -90,6 +96,8 @@ void ADOFCharacter::SetupPlayerInputComponent(class UInputComponent *InputCompon
 
 	check(InputComponent);
 
+	InputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ADOFCharacter::StartCrouching);
+	InputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &ADOFCharacter::StopCrouching);
 	InputComponent->BindAxis("Turn", this, &ADOFCharacter::Turn);
 	InputComponent->BindAxis("LookUp", this, &ADOFCharacter::LookUp);
 	InputComponent->BindAxis("WalkForward", this, &ADOFCharacter::WalkForward);
@@ -201,11 +209,57 @@ void ADOFCharacter::CameraZoomOut()
 	cameraDistance += 10;
 }
 
+void ADOFCharacter::StartCrouching()
+{
+	if (!Crouching)
+	{
+		Crouching = true;
+		running = false;
+		supportPivot->CameraLagSpeed = 12.f;
+		CharacterMovement->MaxWalkSpeed = CrouchSpeed;
+	}
+
+	if (Role < ROLE_Authority) ServerStartCrouching();
+}
+
+void ADOFCharacter::StopCrouching()
+{
+	if (Crouching)
+	{
+		Crouching = false;
+		supportPivot->CameraLagSpeed = 8.f;
+		CharacterMovement->MaxWalkSpeed = walkSpeed;
+	}
+
+	if (Role < ROLE_Authority) ServerStopCrouching();
+}
+
+void ADOFCharacter::ServerStartCrouching_Implementation()
+{
+	StartCrouching();
+}
+
+void ADOFCharacter::ServerStopCrouching_Implementation()
+{
+	StopCrouching();
+}
+
+bool ADOFCharacter::ServerStartCrouching_Validate()
+{
+	return true;
+}
+
+bool ADOFCharacter::ServerStopCrouching_Validate()
+{
+	return true;
+}
+
 void ADOFCharacter::StartRunning()
 {
-	if (!running)
+	if (!running && !Crouching)
 	{
 		running = true;
+		Crouching = false;
 		supportPivot->CameraLagSpeed = 12.f;
 		CharacterMovement->MaxWalkSpeed = runSpeed;
 	}
@@ -215,9 +269,12 @@ void ADOFCharacter::StartRunning()
 
 void ADOFCharacter::StopRunning()
 {
-	running = false;
-	supportPivot->CameraLagSpeed = 8.f;
-	CharacterMovement->MaxWalkSpeed = walkSpeed;
+	if (running)
+	{
+		running = false;
+		supportPivot->CameraLagSpeed = 8.f;
+		CharacterMovement->MaxWalkSpeed = walkSpeed;
+	}
 
 	if (Role < ROLE_Authority) ServerStopRunning();
 }

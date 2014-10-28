@@ -14,6 +14,7 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 	GENERATED_UCLASS_BODY()
 
 	bool running = false;
+	bool Crouching = false;
 
 	float forwardSpeed = 0.f;
 	float rightSpeed = 0.f;
@@ -29,6 +30,9 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float runSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+	float CrouchSpeed;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	TSubobjectPtr<class USpringArmComponent> supportPivot;
 
@@ -40,7 +44,11 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 
 public:
 
+	UFUNCTION(BlueprintCallable, Category = Movement)
 	bool IsRunning();
+
+	UFUNCTION(BlueprintCallable, Category = Movement)
+	bool IsCrouching();
 
 	void SetForwardSpeed(float speed);
 	void SetRightSpeed(float speed);
@@ -82,6 +90,14 @@ protected:
 	virtual void CameraZoomOut();
 	virtual void StartRunning();
 	virtual void StopRunning();
+	virtual void StartCrouching();
+	virtual void StopCrouching();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	virtual void ServerStartCrouching();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	virtual void ServerStopCrouching();
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	virtual void ServerStartRunning();
