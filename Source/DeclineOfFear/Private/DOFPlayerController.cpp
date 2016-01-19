@@ -4,10 +4,9 @@
 #include "DOFPlayerController.h"
 
 
-ADOFPlayerController::ADOFPlayerController(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+ADOFPlayerController::ADOFPlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	InputComponent = ConstructObject<UInputComponent>(UInputComponent::StaticClass(), this, TEXT("ControllerInputComponent"));
+	InputComponent = NewObject<UInputComponent>(this, TEXT("ControllerInputComponent"));
 
 	toDestroy = nullptr;
 	controlledCharacter = nullptr;

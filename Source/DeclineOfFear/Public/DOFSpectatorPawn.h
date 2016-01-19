@@ -15,7 +15,8 @@ class DECLINEOFFEAR_API ADOFSpectatorPawn : public ASpectatorPawn
 
 	virtual void BeginPlay() override;
 
-protected:
+public:
 
-	
+    
+
 };

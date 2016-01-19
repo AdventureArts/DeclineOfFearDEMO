@@ -6,8 +6,7 @@
 #include "DOFPlayerController.h"
 
 
-ADOFSpectatorPawn::ADOFSpectatorPawn(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+ADOFSpectatorPawn::ADOFSpectatorPawn(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 
 }

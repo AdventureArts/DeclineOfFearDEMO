@@ -4,8 +4,7 @@
 #include "DOFCharacter.h"
 
 
-ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+ADOFCharacter::ADOFCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	walkSpeed = 150.f;
 	runSpeed = 400.f;
@@ -13,14 +12,14 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 
 	cameraBone = FName(TEXT("None"));
 
-	CharacterMovement->MaxAcceleration = 512.f;
-	CharacterMovement->GroundFriction = 2.f;
-	CharacterMovement->BrakingDecelerationWalking = 256.f;
-	CharacterMovement->bOrientRotationToMovement = true;
-	CharacterMovement->RotationRate.Yaw = 270.f;
-	CharacterMovement->MaxWalkSpeed = walkSpeed;
+	GetCharacterMovement()->MaxAcceleration = 512.f;
+    GetCharacterMovement()->GroundFriction = 2.f;
+    GetCharacterMovement()->BrakingDecelerationWalking = 256.f;
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->RotationRate.Yaw = 270.f;
+    GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 
-	supportPivot = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("PivotSupport"));
+	supportPivot = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("PivotSupport"));
 	supportPivot->AttachTo(RootComponent);
 	supportPivot->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 	supportPivot->bEnableCameraLag = true;
@@ -30,13 +29,13 @@ ADOFCharacter::ADOFCharacter(const class FPostConstructInitializeProperties& PCI
 	supportPivot->TargetArmLength = 50.f;
 	supportPivot->bUsePawnControlRotation = true;
 
-	cameraSupport = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraSupport"));
+	cameraSupport = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraSupport"));
 	cameraSupport->AttachTo(supportPivot);
 	cameraSupport->SetRelativeLocation(FVector(0.f, 50.f, 0.f));
 	cameraSupport->TargetArmLength = cameraDistance;
 	cameraSupport->bUsePawnControlRotation = false;
 
-	playerCamera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("PlayerCamera"));
+	playerCamera = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("PlayerCamera"));
 	playerCamera->AttachTo(cameraSupport, USpringArmComponent::SocketName);
 	playerCamera->bUsePawnControlRotation = false;
 
@@ -62,6 +61,11 @@ void ADOFCharacter::TeleportCamera()
 {
 	supportPivot->PreviousDesiredLoc = FVector(0.f, 0.f, 0.f);
 	supportPivot->PreviousDesiredRot = FRotator(0.f, 0.f, 0.f);
+}
+
+void ADOFCharacter::UnPossessMe()
+{
+
 }
 
 void ADOFCharacter::TeleportCamera(FVector loc, FRotator rot)
@@ -119,9 +123,9 @@ void ADOFCharacter::Tick(float DeltaSeconds)
 
 void ADOFCharacter::AttachCameraToBone(FName boneName)
 {
-	if (Mesh)
+	if (GetMesh())
 	{
-		if (Mesh->GetBoneIndex(boneName) != INDEX_NONE)
+		if (GetMesh()->GetBoneIndex(boneName) != INDEX_NONE)
 		{
 			cameraBone = boneName;
 			cameraBoneAttached = true;
@@ -146,7 +150,7 @@ void ADOFCharacter::UpdateCameraAnimation()
 {
 	if (cameraBoneAttached)
 	{
-		FVector boneLocation = Mesh->GetBoneLocation(cameraBone);
+		FVector boneLocation = GetMesh()->GetBoneLocation(cameraBone);
 
 		supportPivot->SetWorldLocation(boneLocation);
 	}
@@ -158,7 +162,7 @@ void ADOFCharacter::UpdateMovementDirection()
 
 	movementDirection = FVector(forwardSpeed, rightSpeed, 0.f);
 	movementDirection = GetControlRotation().RotateVector(movementDirection);
-	movementDirection = movementDirection.SafeNormal2D();
+	movementDirection = movementDirection.GetSafeNormal2D();
 
 	AddMovementInput(movementDirection, 1.f);
 }
@@ -168,7 +172,7 @@ void ADOFCharacter::InterpolateCameraDistance(float delta)
 	float armLength, speed, runningFactor, runningOffset;
 
 	armLength = cameraSupport->TargetArmLength;
-	speed = CharacterMovement->Velocity.Size2D();
+	speed = GetCharacterMovement()->Velocity.Size2D();
 	runningFactor = (speed - walkSpeed) / (runSpeed - walkSpeed);
 	runningOffset = runningCameraOffset * runningFactor;
 
@@ -216,7 +220,7 @@ void ADOFCharacter::StartCrouching()
 		Crouching = true;
 		running = false;
 		supportPivot->CameraLagSpeed = 12.f;
-		CharacterMovement->MaxWalkSpeed = CrouchSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
 	}
 
 	if (Role < ROLE_Authority) ServerStartCrouching();
@@ -228,7 +232,7 @@ void ADOFCharacter::StopCrouching()
 	{
 		Crouching = false;
 		supportPivot->CameraLagSpeed = 8.f;
-		CharacterMovement->MaxWalkSpeed = walkSpeed;
+        GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 	}
 
 	if (Role < ROLE_Authority) ServerStopCrouching();
@@ -261,7 +265,7 @@ void ADOFCharacter::StartRunning()
 		running = true;
 		Crouching = false;
 		supportPivot->CameraLagSpeed = 12.f;
-		CharacterMovement->MaxWalkSpeed = runSpeed;
+        GetCharacterMovement()->MaxWalkSpeed = runSpeed;
 	}
 
 	if (Role < ROLE_Authority) ServerStartRunning();
@@ -273,7 +277,7 @@ void ADOFCharacter::StopRunning()
 	{
 		running = false;
 		supportPivot->CameraLagSpeed = 8.f;
-		CharacterMovement->MaxWalkSpeed = walkSpeed;
+        GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 	}
 
 	if (Role < ROLE_Authority) ServerStopRunning();

@@ -34,13 +34,13 @@ class DECLINEOFFEAR_API ADOFCharacter : public ACharacter
 	float CrouchSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	TSubobjectPtr<class USpringArmComponent> supportPivot;
+	USpringArmComponent* supportPivot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	TSubobjectPtr<class USpringArmComponent> cameraSupport;
+	USpringArmComponent* cameraSupport;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	TSubobjectPtr<class UCameraComponent> playerCamera;
+	UCameraComponent* playerCamera;
 
 public:
 

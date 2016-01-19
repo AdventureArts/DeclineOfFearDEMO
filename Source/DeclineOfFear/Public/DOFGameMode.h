@@ -13,5 +13,7 @@ class DECLINEOFFEAR_API ADOFGameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
 
+public:
+
 	virtual void BeginPlay() override;
 };

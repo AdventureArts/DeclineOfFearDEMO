@@ -6,8 +6,7 @@
 #include "DOFPlayerController.h"
 
 
-ADOFGameMode::ADOFGameMode(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+ADOFGameMode::ADOFGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	static ConstructorHelpers::FClassFinder<ADOFCharacter> adamClass(TEXT("/Game/Blueprints/Characters/Hero/Hero_Character"));
 
